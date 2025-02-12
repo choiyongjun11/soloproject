@@ -13,6 +13,22 @@ public enum ExceptionCode {
      - enum을 사용하면 오타방지 "Bad Request" 같은 문자열을 직접 입력하지 않아도 된다.
 
      25-02-11 용준 Q1) 그럼 enum 이라는 것은 무엇인가요??
+     25-02-12 강사님께 물어본 후 - 용준2님 답변) 상수들을 관리하는 집합으로 이루어져 있으며 클래스와 같은 용도로 사용합니다. BAD_REQUEST(400, "Bad Request")와 같이 대문자로 선언되는 이유도 '상수'이기 때문입니다.
+
+     25-02-12 ChatGpt - enum(열거형)이란? 질문함.
+     - enum(열거형, Enumeration)은 여러 개의 상수(Constant) 값을 한 곳에서 관리하는 특수한 클래스입니다.
+     즉, 고정된 값(상수)을 표현할 때 사용하는 자료형이며, BAD_REQUEST(400, "Bad Request")처럼 대문자로 선언도는 이유도 상수이기 때문입니다.
+     - enum 의 특징
+     1. 상수들의 집합으로 정해진 값들만 가질 수 있습니다.
+     2. 객체처럼 사용가능하며 필드, 생성자, 메서드를 가질 수 있습니다.
+     3. 안전한 코드 작성이 가능하며 실수로 잘못된 값을 넣는 실수를 방지할 수 있습니다.
+     4. switch 문과 함꼐 사용가능하며 코드 가독성이 좋아집니다.
+
+     - enum을 사용하는 이유
+     - 기본적으로 상수를 사용할 때는 static final 변수를 사용하지만, enum을 사용하면 더 구조적이고 의미 있는 코드를 만들 수 있습니다.
+     - 기존의 static final 같은 경우 단순한 숫자로만 관리되기 떄문에, 어떤 의미인지 명확하지 않아 구별하기 힘들었습니다.
+     - enum 을 사용하면 BAD_REQUEST(400, "Bad Request") 이 처럼 코드에 대한 가독성이 좋아지고, 의미가 명확해집니다. 대문자로 선언하는 이유도 상수이기 떄문인 것입니다.
+     - 따라서 잘못된 값을 넣을 위험이 줄어든다는 것입니다.
 
 --------------------------------------------------------------
      HTTP 상태 코드 (4XX 코드 , 5XX 코드) 개념
@@ -128,17 +144,17 @@ public enum ExceptionCode {
     NETWORK_CONNECT_TIMEOUT_ERROR(599, "Network Connect Timeout Error");
 
     //클라이언트가 웹 사이트(서버)에 요청을 했을 때 잘 전달이 됐는지 응답을 해줘야 합니다.
-    //status, message 를 응답으로 반환하여 사용자에게 알려준다.
+    //code, message 를 응답으로 반환하여 사용자에게 알려준다.
     @Getter
-    private int status; //http 웹 사이트 상태를 숫자로 코드로 표시하여 알리기 위해서 사용합니다.
+    private int code; //http 웹 사이트 상태를 숫자로 코드로 표시하여 알리기 위해서 사용합니다.
 
     @Getter
     private String message; //어떤 사유로 에러 코드를 전달 했는지에 대한 메시지를 사용자에게 알려주기 위해서 사용합니다.
 
-    //25-02-11 용준 Q3) 아래 생성자를 보면 int code 로 매개변수를 가집니다. this.status = code 이렇게 설정하는 이유는?
-    //25-02-11 용준2님 - 답변) 생성자이다. 열거형(enum)의 각 항목이 생성될 때 초기값을 설정하는 역할을 합니다.
-    ExceptionCode(int code,String message) {
-        this.status = code;
+    //25-02-11 용준 Q3) 아래 생성자를 보면 int code 로 매개변수를 가집니다. this.code = code 이렇게 설정하는 이유는?
+    //25-02-12 강사님께 물어본 후 - 용준2님 답변) 생성자입니다. 열거형(enum)의 각 항목이 BAD_REQUEST(400, "Bad Request") 처럼 생성될 때 초기값을 설정하는 역할을 합니다.
+    ExceptionCode(int code, String message) {
+        this.code = code;
         this.message = message;
     }
 
