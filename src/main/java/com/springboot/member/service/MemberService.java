@@ -44,9 +44,14 @@ public class MemberService {
     }
 
     public Member updateMember(Member member) {
+
         Member findMember = findVerifiedMember(member.getMemberId());
+        Optional.ofNullable(member.getName())
+                .ifPresent(name -> findMember.setName(name));
+        Optional.ofNullable(member.getPhone())
+                .ifPresent(phone -> findMember.setPhone(phone));
+
         return memberRepository.save(findMember);
-        //기능 추가 필요
     }
 
     public void deleteMember(long memberId) {
@@ -66,9 +71,19 @@ public class MemberService {
         return findMember;
     }
 
+    //password null 인지 검증 기능
+    public void saveMember(Member member) {
+        if (member.getPassword() == null || member.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be null or empty!");
+        }
+        memberRepository.save(member);
+    }
+
     private void verifyExistsEmail(String email) {
         Optional<Member> member = memberRepository.findByEmail(email);
         if (member.isPresent())
             throw new BusinessLogicException(ExceptionCode.NOT_FOUND);
     }
+
+
 }

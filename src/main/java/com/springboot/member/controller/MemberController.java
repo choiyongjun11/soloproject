@@ -35,9 +35,11 @@ public class MemberController {
         return ResponseEntity.created(location).build();
     }
 
-
     @PatchMapping("/{member-id}")
     public ResponseEntity patchMember(@PathVariable("member-id") long memberId, @RequestBody MemberDto.Patch requestBody ) {
+
+        requestBody.setMemberId(memberId); //requestbody 에 memberId 설정하여 patch 기능 에러 해결 완료. 25-02-13 새벽 12:58
+
         Member member = memberService.updateMember(mapper.memberPatchToMember(requestBody));
 
         return new ResponseEntity<>(new SingleResponseDto<>(mapper.memberToMemberResponse(member)),HttpStatus.OK);
@@ -49,7 +51,6 @@ public class MemberController {
         Member member = memberService.findMember(memberId);
         return new ResponseEntity<>(new SingleResponseDto<>(mapper.memberToMemberResponse(member)), HttpStatus.OK);
     }
-
 
     @DeleteMapping("/{member-id}")
     public ResponseEntity deleteMember(@PathVariable("member-id") long memberId) {
