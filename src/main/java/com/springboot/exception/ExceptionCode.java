@@ -163,3 +163,20 @@ public enum ExceptionCode {
     }
 
 }
+
+/*
+추후 찾은 내용: 2025-02-12 03:16 PM 최용준 개발자.
+이런식으로 구현되어 있는게 존재한다..
+
+ public enum HttpStatus{
+ CONTINUE(100, HttpStatus.Series.INFORMATIONAL, "Continue"),
+    SWITCHING_PROTOCOLS(101, HttpStatus.Series.INFORMATIONAL, "Switching Protocols"),
+    PROCESSING(102, HttpStatus.Series.INFORMATIONAL, "Processing"),
+    CHECKPOINT(103, HttpStatus.Series.INFORMATIONAL, "Checkpoint"),
+    OK(200, HttpStatus.Series.SUCCESSFUL, "OK"),
+    CREATED(201, HttpStatus.Series.SUCCESSFUL, "Created"),
+ }
+
+
+ */
+
