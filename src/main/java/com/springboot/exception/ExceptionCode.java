@@ -12,9 +12,13 @@ public enum ExceptionCode {
      - throw new CustomException(ExceptionCode.NOT_FOUND)
      - enum을 사용하면 오타방지 "Bad Request" 같은 문자열을 직접 입력하지 않아도 된다.
 
-     25-02-11 용준 Q1) 그럼 enum 이라는 것은 무엇인가요??
-     25-02-12 강사님께 물어본 후 - 용준2님 답변) 상수들을 관리하는 집합으로 이루어져 있으며 클래스와 같은 용도로 사용합니다. BAD_REQUEST(400, "Bad Request")와 같이 대문자로 선언되는 이유도 '상수'이기 때문입니다.
+     3. Q&A
+      - 김용준 고객님 Q&A 총 질문 수: 3개 (Q1 - 응답 완료, Q2 - 응답 완료, Q3 - 응답 완료)
 
+
+     25-02-11 김용준 고객님 - Q1) 그럼 enum 이라는 것은 무엇인가요??
+     25-02-12 강사님께 물어본 후 최용준 개발자님 - 답변) 상수들을 관리하는 집합으로 이루어져 있으며 클래스와 같은 용도로 사용합니다. BAD_REQUEST(400, "Bad Request")와 같이 대문자로 선언되는 이유도 '상수'이기 때문입니다.
+     자세한 사항
      25-02-12 ChatGpt - enum(열거형)이란? 질문함.
      - enum(열거형, Enumeration)은 여러 개의 상수(Constant) 값을 한 곳에서 관리하는 특수한 클래스입니다.
      즉, 고정된 값(상수)을 표현할 때 사용하는 자료형이며, BAD_REQUEST(400, "Bad Request")처럼 대문자로 선언도는 이유도 상수이기 때문입니다.
@@ -62,9 +66,9 @@ public enum ExceptionCode {
     501 - Not Implemented - 요청에 대해 구현되지 않아 수행하지 아니한다.
     클라이언트가 서버의 능력을 넘은 요청을 했을 때, 서버가 기능을 지원하지 않음을 나타내는 것입니다. 추후에 기능이 개발되면 지원한다는 의미.
 
-    25-02-11 용준 Q2) 405 상태코드와 501 상태코드에 대한 설명이 비슷한것 같아 보입니다!
+    25-02-11 김용준 고객님 - Q2) 405 상태코드와 501 상태코드에 대한 설명이 비슷한것 같아 보입니다!
 
-    25-02-11 용준2님 - 답변)
+    25-02-11 최용준 개발자님 - 답변)
     클라이언트 - 405 상태코드(Method Not Allowed) VS  서버 - 501 상태코드(Not Implemented) 공통점과 차이점
     - 두 상태코드는 클라이언트의 HTTP 메서드 요청으로부터 서버에서 지원하지 않아 요청을 반려한다는 점에서 유사성을 가지고 있습니다.
     - 차이점으로는 405 상태코드는 클라이언트가 지원되지 않는 기능을 요청했다는 점에서 구체적이다.
@@ -117,7 +121,7 @@ public enum ExceptionCode {
 
     출처: https://sanghaklee.tistory.com/61 이상학의 개발블로그,
      https://inpa.tistory.com/entry/HTTP-%F0%9F%8C%90-5XX-Server-Error-%EC%83%81%ED%83%9C-%EC%BD%94%EB%93%9C-%EC%A0%9C%EB%8C%80%EB%A1%9C-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0 Inpa Dev 블로그
-        ,최용준(본인)의 네트워크 지식
+        ,최용준(본인)개발자 예정자의 네트워크 지식
 
     이 개념을 바탕으로 코드로 구현해보자.
 --------------------------------------------------------------
@@ -151,8 +155,8 @@ public enum ExceptionCode {
     @Getter
     private String message; //어떤 사유로 에러 코드를 전달 했는지에 대한 메시지를 사용자에게 알려주기 위해서 사용합니다.
 
-    //25-02-11 용준 Q3) 아래 생성자를 보면 int code 로 매개변수를 가집니다. this.code = code 이렇게 설정하는 이유는?
-    //25-02-12 강사님께 물어본 후 - 용준2님 답변) 생성자입니다. 열거형(enum)의 각 항목이 BAD_REQUEST(400, "Bad Request") 처럼 생성될 때 초기값을 설정하는 역할을 합니다.
+    //25-02-11 김용준 고객님 - Q3) 아래 생성자를 보면 int code 로 매개변수를 가집니다. this.code = code 이렇게 설정하는 이유는?
+    //25-02-12 강사님께 물어본 후, 최용준 개발자님 -답변) 생성자입니다. 열거형(enum)의 각 항목이 BAD_REQUEST(400, "Bad Request") 처럼 생성될 때 초기값을 설정하는 역할을 합니다.
     ExceptionCode(int code, String message) {
         this.code = code;
         this.message = message;
