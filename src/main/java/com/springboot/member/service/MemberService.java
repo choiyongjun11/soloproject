@@ -1,14 +1,16 @@
 package com.springboot.member.service;
 
+import com.springboot.AuthorityUtils;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.entity.Member;
 import com.springboot.member.mapper.MemberMapper;
 import com.springboot.member.repository.MemberRepository;
-//import org.springframework.security.core.authority.AuthorityUtils;
-//import org.springframework.security.crypto.password.PasswordEncoder;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -16,25 +18,31 @@ public class MemberService {
     //create,  find, update , delete
     //entity 처리
 
-//
-//    public MemberService(MemberRepository memberRepository, PasswordEncoder passwordEncoder, AuthorityUtils authorityUtils) {
-//        this.memberRepository = memberRepository;
-//        this.passwordEncoder = passwordEncoder;
-//        this.authorityUtils = authorityUtils;
-//    }
-
-
-    public MemberService(MemberRepository memberRepository) {
-        this.memberRepository = memberRepository;
-    }
 
     private final MemberRepository memberRepository;
-    //private final PasswordEncoder passwordEncoder; //spring security jwt 토큰 인증을 위해
-    //private final AuthorityUtils authorityUtils; //spring security jwt 토큰 인증을 위해
+    private final PasswordEncoder passwordEncoder; //spring security jwt 토큰 인증을 위해
+    private final AuthorityUtils authorityUtils; //spring security jwt 토큰 인증을 위해 우리가 만든 AuthorityUtils 클래스를 활용한다.
+
+    public MemberService(MemberRepository memberRepository, PasswordEncoder passwordEncoder, AuthorityUtils authorityUtils) {
+        this.memberRepository = memberRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.authorityUtils = authorityUtils;
+    }
+
 
 
     public Member createMember(Member member) {
         verifyExistsEmail(member.getEmail());
+        //password 암호화
+        String encryptedPassword = passwordEncoder.encode(member.getPassword());
+        member.setPassword(encryptedPassword);
+
+        //권한 정보 추가
+        List<String> roles = authorityUtils.createRoles(member.getEmail());
+
+
+        member.setRoles(roles);
+
         Member savedMember = memberRepository.save(member);
         return savedMember;
     }

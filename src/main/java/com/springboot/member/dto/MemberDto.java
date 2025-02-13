@@ -22,7 +22,7 @@ public class MemberDto {
         @NotSpace
         private String name;
 
-        @Pattern(regexp = "^010-\\d{3,4}-\\d{4}$", message = "휴대폰 번호 11자리로 구성되어 있으며 '-' 형태로 되어야 합니다.")
+        @Pattern(regexp = "^010-\\d{3,4}-\\d{4}$", message = "휴대폰 번호 11자리로 구성되어 있으며 '-' 형태로 되어야 합니다.") //패턴을 지정하여 사용자가 010-1234-5678 다음과 같은 형테로만 입력하게 설정
         private String phone;
 
     }
@@ -35,7 +35,7 @@ public class MemberDto {
         @NotSpace
         private String name;
 
-        @Pattern(regexp = "^010-\\d{3,4}-\\d{4}$", message = "휴대폰 번호 11자리로 구성되어 있으며 '-' 형태로 되어야 합니다.")
+        @Pattern(regexp = "^010-\\d{3,4}-\\d{4}$", message = "휴대폰 번호 11자리로 구성되어 있으며 '-' 형태로 되어야 합니다.") //패턴을 지정하여 사용자가 010-1234-5678 다음과 같은 형테로만 입력하게 설정
         private String phone;
 
         public void setMemberId(long memberId) {
