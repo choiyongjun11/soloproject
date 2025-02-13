@@ -31,7 +31,7 @@ public class Member extends Auditable {
     @Column(length = 64, nullable = false)
     private String name;
 
-    @Column(nullable = false, updatable = false)
+    @Column(length = 13, nullable = false, unique = true)
     private String phone;
 
     // 궈한 부여 기능
