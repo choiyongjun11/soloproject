@@ -1,4 +1,4 @@
-package com.springboot.jwt;
+package com.springboot.auth.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -42,11 +42,11 @@ public class JwtTokenizer {
 
     @Getter
     @Value("${jwt.access-token-expiration-minutes}")
-    private String accessTokenExpirationMinutes; //어세스 토큰 만료 시간
+    private int accessTokenExpirationMinutes; //토큰 만료 시간
 
     @Getter
-    @Value("${refresh-token-expiration-minutes}")
-    private String refreshTokenExpirationMinutes; // 리프래쉬 토큰 만료 시간
+    @Value("${jwt.refresh-token-expiration-minutes}")
+    private int refreshTokenExpirationMinutes; //토큰 만료 시간
 
     public String encodeBase64SecretKey(String secretKey) { //secretKey 발행
 

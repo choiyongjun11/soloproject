@@ -1,6 +1,5 @@
-package com.springboot;
+package com.springboot.auth.utils;
 
-import com.springboot.auth.utils.AuthorityUtils;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.entity.Member;

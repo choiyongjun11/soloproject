@@ -1,4 +1,4 @@
-package com.springboot.looks.entity;
+package com.springboot.look.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Looks {
+public class Look {
     private long lookId;
 
 }

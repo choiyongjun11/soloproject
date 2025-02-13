@@ -1,4 +1,4 @@
-package com.springboot.likes.entity;
+package com.springboot.like.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,6 +9,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Likes {
+public class Like {
     private long likesId;
 }

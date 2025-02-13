@@ -1,10 +1,9 @@
 package com.springboot.member.service;
 
-import com.springboot.AuthorityUtils;
+import com.springboot.auth.utils.AuthorityUtils;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.entity.Member;
-import com.springboot.member.mapper.MemberMapper;
 import com.springboot.member.repository.MemberRepository;
 
 import org.springframework.security.crypto.password.PasswordEncoder;

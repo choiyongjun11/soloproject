@@ -1,4 +1,4 @@
-package com.springboot;
+package com.springboot.auth.utils;
 
 
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +18,7 @@ public class AuthorityUtils {
         application.yml 파일에 admin 주소가 동일한지 확인하자.
 
      */
-    @Value("${mail.address.mail}")
+    @Value("${mail.address.admin}")
     private String adminMailAddress; //최고 관리자 메일 주소
 
     //미리 만들어진 AuthorityUtils Class 에서 createAuthorityList 를 이용해서 ADMIN, USER 에 대한 권한을 구현했습니다.

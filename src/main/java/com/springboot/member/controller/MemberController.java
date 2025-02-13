@@ -10,11 +10,12 @@ import com.springboot.utils.UriCreator;
 import org.springframework.data.domain.DomainEvents;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
-//post,get, patch, delete
+//post,get, patch, delete ,   @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 @RestController
 @RequestMapping("/v1/members")
 public class MemberController {
@@ -46,6 +47,7 @@ public class MemberController {
     }
 
     @GetMapping("/{member-id}")
+
     public ResponseEntity getMember(@PathVariable("member-id") long memberId) {
 
         Member member = memberService.findMember(memberId);
