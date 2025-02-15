@@ -33,6 +33,21 @@ public class BoardService {
     }
 
     public Board createBoard(BoardDto.Post postDto, long memberId) {
+
+        /*
+        - **질문은 회원(고객)만 등록할 수 있다.**
+        - 질문 등록시 등록 날짜가 생성 되어야 한다. (day)
+        - 질문은 질문의 상태 값이 필요하다.
+        - QUESTION_REGISTERED - 질문 등록 상태
+        - QUESTION_ANSWERED - 답변 완료 상태
+        - QUESTION_DELETED - 질문 삭제 상태
+        - QUESTION_DEACTIVED - 질문 비활성화 상태: 회원 탈퇴 시, 질문 비활성화 상태
+        - **질문 등록 시, 초기 상태 값은 QUESTION_REGISTERED 이어야 합니다.**
+        - 질문 제목과 내용은 필수입력 사항이다.
+        - 질문은 비밀글과 공개글 둘 중에 하나로 설정되어야 한다.
+        - public (공개글 상태)   OR   secret (비밀글 상태)
+         */
+
         Member member = memberService.findVerifiedMember(memberId);
 
         // AuthorityUtils 에서 이메일을 기반으로 role 가져옴
@@ -67,25 +82,147 @@ public class BoardService {
 
     }
 
-
-
-    public Board findBoard(long boardId, long memberId, boolean isAdmin) {
+    @Transactional
+    public Board findBoard(long boardId, long memberId ) {
         Board board = findVerifiedBoard(boardId);
+
+        /*
+        - 1건의 특정 질문은 회원(고객)과 관리자 모두 조회할 수 있습니다. (admin, user) 조회 권한
+        - 비밀글 상태인 질문은 질문을 등록한 회원(고객)과 관리자만 조회할 수 있습니다.
+        - 1건의 질문 조회 시, 해당 질문에 대한 답변이 존재한다면 답변도 함께 조회되어야 합니다.
+        - 이미 삭제 상태인 질문은 조회할 수 없다 (1)
+         */
+
+        //질문 삭제 상태인지 확인, 삭제 상태이면 not_found 에러 보내기
+        if (board.getQuestionStatus() == Board.QuestionStatus.QUESTION_DELETED) {
+            throw new BusinessLogicException(ExceptionCode.NOT_FOUND);
+        }
+
+        //비밀글에 대해서 작성한 user, admin 만 조회하도록 하기 -> authorityUtils의 권한(role)을 이용해야함
+        Member member = memberService.findVerifiedMember(memberId);
+        List<String> roles = authorityUtils.createRoles(member.getEmail());
+        boolean isAdmin = roles.contains("ADMIN");
+
+        if (board.isSecret() && !isAdmin && board.getMember().getMemberId() != memberId) {
+            throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
+        }
 
         return board;
 
     }
 
+    @Transactional
+    public Board updateBoard(long boardId, long memberId, BoardDto.Patch patchDto){
+
+   /*
+    ** 질문 수정 - 회원(고객)이 등록한 질문을 수정하는 기능 (Update) **
+    - 등록된 질문의 제목과 내용은 질문을 등록한 회원(고객)만 수정할 수 있어야 한다.
+    - 회원이 등록한 질문을 비밀글로 변경할 경우, QUESTION_SECRET 상태로 수정되어야 한다.
+    - 질문 상태 중에서 QUESTION_ANSWERED 로의 변경은 관리자만 가능하다.
+    - 회원이 등록한 질문을 회원이 삭제할 경우, QUESTION_DELETED 상태로 수정되어야 한다.
+    - 답변 완료된 질문은 수정할 수 없다
+     */
+
+        // 1. 수정할 질문 찾기
+        Board board = findVerifiedBoard(boardId);
+
+        // 2. 답변 완료된 질문은 수정 불가
+        if (board.getQuestionStatus() == Board.QuestionStatus.QUESTION_ANSWERED) {
+            throw new BusinessLogicException(ExceptionCode.NOT_FOUND);
+        }
+
+        // 3. 질문을 등록한 회원인지 확인
+        Member member = memberService.findVerifiedMember(memberId);
+        if (board.getMember().getMemberId() != memberId) {
+            throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
+        }
+
+        // 4. 제목과 내용 업데이트
+        if (patchDto.getTitle() != null) {
+            board.setTitle(patchDto.getTitle());
+        }
+        if (patchDto.getContent() != null) {
+            board.setContent(patchDto.getContent());
+        }
+
+        // 5. 비밀글로 변경할 경우 상태 업데이트
+        if (patchDto.isSecret()) {
+            board.setSecret(true);
+            board.setQuestionStatus(Board.QuestionStatus.QUESTION_SECRET);
+        }
+
+        return boardRepository.save(board);
+
+
+
+    }
+
+    @Transactional
+    public void deleteBoard(long boardId, long memberId) {
+    /*
+        **1건의 질문 삭제 - 회원(고객)이 등록한 1건의 질문을 삭제하는 기능 (Delete)**
+        요구 사항(제한 사항)
+        - 1건의 질문은 회원(고객)만 삭제할 수 있다.
+        - 1건의 질문 삭제는 질문을 등록한 회원만 가능하다.
+        - 질문 삭제 시, 테이블에서 row 자체가 삭제되는 것이 아니라 질문 상태 값이(QUESTION_DELETE)으로 변경되어야 한다.
+        - 이미 삭제 상태인 질문은 삭제할 수 없다.
+     */
+
+        // 1. 삭제할 질문 찾기
+        Board board = findVerifiedBoard(boardId);
+
+        // 2. 이미 삭제된 질문인지 확인
+        if (board.getQuestionStatus() == Board.QuestionStatus.QUESTION_DELETED) {
+            throw new BusinessLogicException(ExceptionCode.NOT_FOUND);
+        }
+
+        // 3. 본인이 작성한 질문인지 확인
+        if (board.getMember().getMemberId() != memberId) {
+            throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
+        }
+
+        // 4. 상태를 `QUESTION_DELETED`로 변경
+        board.setQuestionStatus(Board.QuestionStatus.QUESTION_DELETED);
+
+        boardRepository.save(board);
+
+
+    }
+
+    //관리자만 답변 완료(QUESTION_ANSWERED) 상태로 변경 가능
+    @Transactional
+    public Board answered(long boardId, long memberId) {
+        Board board = findVerifiedBoard(boardId);
+
+        //이미 답변이 완료된 질문인지 확인
+        if (board.getQuestionStatus() == Board.QuestionStatus.QUESTION_ANSWERED) {
+            throw new BusinessLogicException(ExceptionCode.NOT_FOUND);
+        }
+
+        //관리자 권한 확인
+        Member member = memberService.findVerifiedMember(memberId);
+        List<String> roles = authorityUtils.createRoles(member.getEmail());
+        if (!roles.contains("ADMIN")) {
+            throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
+        }
+
+        board.setQuestionStatus(Board.QuestionStatus.QUESTION_ANSWERED);
+        return boardRepository.save(board);
+    }
 
 
 
 
     private Board findVerifiedBoard(long boardId) {
-        return boardRepository.findById(boardId)
+        Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.NOT_FOUND));
+        //삭제된 질문은 조회가 안됩니다.
+        if (board.getQuestionStatus() == Board.QuestionStatus.QUESTION_DELETED) {
+            throw new BusinessLogicException(ExceptionCode.NOT_FOUND);
+        }
+
+        return board;
+
     }
-
-
-
 
 }
