@@ -145,7 +145,11 @@ public enum ExceptionCode {
     LOOP_DETECTED(508, "Loop Detected"),
     NOT_EXTENDED(510, "Not Extended"),
     NETWORK_AUTHENTICATION_REQUIRED(511, "Network Authentication Required"),
-    NETWORK_CONNECT_TIMEOUT_ERROR(599, "Network Connect Timeout Error");
+    NETWORK_CONNECT_TIMEOUT_ERROR(599, "Network Connect Timeout Error"),
+
+    //추가 사항
+    TITLE_REQUIRED(400, "질문 제목은 필수 입력 사항입니다."),
+    CONTENT_REQUIRED(400, "질문 내용은 필수 입력 사항입니다.");
 
     //클라이언트가 웹 사이트(서버)에 요청을 했을 때 잘 전달이 됐는지 응답을 해줘야 합니다.
     //code, message 를 응답으로 반환하여 사용자에게 알려준다.

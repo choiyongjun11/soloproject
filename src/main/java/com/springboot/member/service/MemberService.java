@@ -69,8 +69,7 @@ public class MemberService {
 
     //검증
     public Member findVerifiedMember(long memberId) {
-        Optional<Member> optionalMember =
-                memberRepository.findById(memberId);
+        Optional<Member> optionalMember = memberRepository.findById(memberId);
 
         Member findMember =
                 optionalMember.orElseThrow(() ->
