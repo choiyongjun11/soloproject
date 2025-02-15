@@ -9,12 +9,16 @@ import com.springboot.exception.ExceptionCode;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+
 
 //create, find, update, delete
 
@@ -112,6 +116,63 @@ public class BoardService {
     }
 
     @Transactional
+    public Page<Board> findBoards(Long memberId, String sortBy, int page, int size) {
+
+        /*
+        **여러 건의 질문 조회 - 회원(고객)이 등록한 여러 건의 질문을 조회하는 기능 (Read - SelectAll)**
+        - 1. 여러 건의 질문 목록은 회원(고객)과 관리자 모두 조회할 수 있다.
+        - 2. 삭제 상태가 아닌 질문만 조회할 수 있다.
+        - 3. 여러 건의 질문 목록에서 각각의 질문에 답변이 존재한다면 답변도 함께 조회할 수 있어야 한다.
+        - 4. 여러 건의 질문 목록은 페이지네이션 처리가 되어 일정 건수 만큼의 데이터만 조회할 수 있어야 한다.
+        - 5. 여러 건의 질문 목록은 아래의 조건으로 정렬해서 조회할 수 있어야 한다.
+            ㄴ 최신글 순으로
+            ㄴ 오래된 글 순으로
+            ㄴ 좋아요가 많은 순으로(좋아요 구현 이후 적용)
+            ㄴ 좋아요가 적은 순으로(좋아요 구현 이후 적용)
+            ㄴ 조회수가 많은 순으로(조회수 구현 이후 적용)
+            ㄴ 조회수가 적은 순으로(조회수 구현 이후 적용)
+         */
+
+        // 삭제된 질문을 제외
+        Board.QuestionStatus deletedStatus = Board.QuestionStatus.QUESTION_DELETED;
+
+        // Pageable 객체 생성 (페이지 번호, 페이지 크기, 정렬 기준)
+        Pageable pageable = PageRequest.of(page, size, getSortBy(sortBy));
+
+        // 회원(고객) 또는 관리자 여부 확인
+        List<String> roles = authorityUtils.createRoles(memberService.findVerifiedMember(memberId).getEmail());
+        boolean isAdmin = roles.contains("ADMIN");
+
+        // 관리자: 모든 질문 조회, 일반 회원: 본인의 질문만 조회
+        if (isAdmin) {
+            return boardRepository.findAllByQuestionStatusNot(deletedStatus, pageable);
+        } else {
+            return boardRepository.findAllByMember_MemberIdAndQuestionStatusNot(memberId, deletedStatus, pageable);
+        }
+    }
+
+    // 정렬 기준을 받는 메서드
+    private Sort getSortBy(String sortBy) {
+        switch (sortBy) {
+            case "latest":
+                return Sort.by(Sort.Order.desc("createdAt")); // 최신글 순
+            case "oldest":
+                return Sort.by(Sort.Order.asc("createdAt")); // 오래된 글 순
+            case "likesDesc":
+                return Sort.by(Sort.Order.desc("likeCount")); // 좋아요 많은 순
+            case "likesAsc":
+                return Sort.by(Sort.Order.asc("likeCount")); // 좋아요 적은 순
+            case "viewCountDesc":
+                return Sort.by(Sort.Order.desc("viewCount")); // 조회수 많은 순
+            case "viewCountAsc":
+                return Sort.by(Sort.Order.asc("viewCount")); // 조회수 적은 순
+            default:
+                return Sort.by(Sort.Order.desc("createdAt")); // 기본적으로 최신글 순
+        }
+    }
+
+
+    @Transactional
     public Board updateBoard(long boardId, long memberId, BoardDto.Patch patchDto){
 
    /*
@@ -152,7 +213,6 @@ public class BoardService {
         }
 
         return boardRepository.save(board);
-
 
 
     }
@@ -209,9 +269,6 @@ public class BoardService {
         board.setQuestionStatus(Board.QuestionStatus.QUESTION_ANSWERED);
         return boardRepository.save(board);
     }
-
-
-
 
     private Board findVerifiedBoard(long boardId) {
         Board board = boardRepository.findById(boardId)

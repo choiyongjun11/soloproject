@@ -18,7 +18,7 @@ public class Board extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // DB에 AUTO_INCREMENT 사용
-    private long boardId;
+    private Long boardId;
 
     @ManyToOne(fetch = FetchType.LAZY) //fetch는 필요할 때만 연관된 데이터를 가져온다.
     @JoinColumn(name = "member_id", nullable = false)  //외례키 member_id로 매핑 - 다대일 관계(N:1)
