@@ -1,11 +1,15 @@
 package com.springboot.board.entity;
 
 import com.springboot.audit.Auditable;
+import com.springboot.comment.entity.Comment;
+import com.springboot.like.entity.Like;
 import com.springboot.member.entity.Member;
 import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -49,6 +53,28 @@ public class Board extends Auditable {
         this.viewCount++;
     }
 
+    //댓글 매핑
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    //좋아요
+    @OneToMany(mappedBy = "board", cascade = CascadeType.PERSIST) //like 가 board에서 제거되면 db에서도 제거시킴
+    private List<Like> likes = new ArrayList<>();
+
+    @Column(nullable = false)
+    private int likeCount = 0;
+
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        this.likeCount = Math.max(0, this.likeCount - 1);
+    }
+
+    //첨부파일 업로드 기능
+    @Column
+    private String imageUpload;
 
     /*
       질문 상태(QuestionStatus)를 정의하는 열거형(enum)

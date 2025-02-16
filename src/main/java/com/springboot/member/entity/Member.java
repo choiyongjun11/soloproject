@@ -2,6 +2,7 @@ package com.springboot.member.entity;
 
 import com.springboot.audit.Auditable;
 import com.springboot.board.entity.Board;
+import com.springboot.like.entity.Like;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,6 +45,8 @@ public class Member extends Auditable {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Board> boards = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST) //like 가 board 에서 제거되면 db에서도 제거
+    private List<Like> likes = new ArrayList<>();
 
     //생성자
     public Member(String email,String name, String phone) {

@@ -2,14 +2,13 @@ package com.springboot.board.dto;
 
 import com.springboot.board.entity.Board;
 import com.springboot.validator.NotSpace;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
 public class BoardDto {
     @Getter
