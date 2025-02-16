@@ -45,6 +45,11 @@ public class Board extends Auditable {
     @Builder.Default // 빌더 패턴 사용 시 조회 수 기본값을 0으로 설정
     private long viewCount= 0; // 조회 수 초기값
 
+    public void increaseViewCount(long boardId) {
+        this.viewCount++;
+    }
+
+
     /*
       질문 상태(QuestionStatus)를 정의하는 열거형(enum)
       - 특정 질문이 현재 어떤 상태인지 나타내는 역할

@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 
 //create, find, update, delete
@@ -107,9 +108,28 @@ public class BoardService {
         List<String> roles = authorityUtils.createRoles(member.getEmail());
         boolean isAdmin = roles.contains("ADMIN");
 
-        if (board.isSecret() && !isAdmin && board.getMember().getMemberId() != memberId) {
+        /*
+        비밀글 - 다른 user 가 작성한 글에 접근 불가하도록 하는 기능, admin 관리자는 가능
+        게시글을 작성한 회원의 ID(ownerId)를 가져옴
+
+        board.getMember()가 null이 아닐 경우 → getMemberId()를 가져옴.
+        board.getMember()가 null이면 -1L로 설정.
+        비밀글(board.isSecret() == true)일 때 접근 권한을 체크
+
+        관리자(isAdmin == true) → 통과 ✅
+        게시글 작성자 본인(ownerId == memberId) → 통과 ✅
+        그 외의 사용자(다른 회원, ownerId != memberId) → 접근 차단! 🚫 FORBIDDEN 예외 발생
+        결과 확인: 안됨.
+         */
+        Long ownerId = Optional.ofNullable(board.getMember())
+                .map(Member::getMemberId)
+                .orElse(-1L); // 기본값 설정
+        if (board.isSecret() && !isAdmin && ownerId != memberId) {
             throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
         }
+
+        board.increaseViewCount(boardId); // 조회 수 증가
+        boardRepository.save(board); // 변경 사항 저장
 
         return board;
 
@@ -149,6 +169,9 @@ public class BoardService {
         } else {
             return boardRepository.findAllByMember_MemberIdAndQuestionStatusNot(memberId, deletedStatus, pageable);
         }
+
+
+
     }
 
     // 정렬 기준을 받는 메서드
