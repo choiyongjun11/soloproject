@@ -56,7 +56,8 @@ public class Board extends Auditable {
         QUESTION_ANSWERED("답변 완료 상태"),
         QUESTION_DELETED("질문 삭제 상태"),
         QUESTION_DEACTIVED("질문 비활성화 상태: 회원 탈퇴 시, 질문 비활성화 상태"),
-        QUESTION_SECRET("질문 비공개");
+        QUESTION_SECRET("질문 비공개"),
+        QUESTION_PUBLIC("질문 공개");
 
         @Getter
         private String status; //상태 설명을 저장하는 필드

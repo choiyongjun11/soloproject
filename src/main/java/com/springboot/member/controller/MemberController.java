@@ -47,7 +47,6 @@ public class MemberController {
     }
 
     @GetMapping("/{member-id}")
-
     public ResponseEntity getMember(@PathVariable("member-id") long memberId) {
 
         Member member = memberService.findMember(memberId);

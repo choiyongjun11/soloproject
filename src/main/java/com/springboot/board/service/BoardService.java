@@ -210,6 +210,9 @@ public class BoardService {
         if (patchDto.isSecret()) {
             board.setSecret(true);
             board.setQuestionStatus(Board.QuestionStatus.QUESTION_SECRET);
+        } else {
+            board.setSecret(false);
+            board.setQuestionStatus(Board.QuestionStatus.QUESTION_PUBLIC); // 공개글 상태로 변경
         }
 
         return boardRepository.save(board);
@@ -281,5 +284,6 @@ public class BoardService {
         return board;
 
     }
+
 
 }
