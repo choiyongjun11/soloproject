@@ -37,7 +37,6 @@ public class CommentDto {
         private long commentId;
         private String content;
         private boolean secret;
-        private String createdBy;
         private LocalDateTime createdAt;
         private Board.QuestionStatus questionStatus; //답변 등록 시 질문 상태 변경
 
