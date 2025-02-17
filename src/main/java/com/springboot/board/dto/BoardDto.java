@@ -6,10 +6,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+
 public class BoardDto {
     @Getter
     @AllArgsConstructor
@@ -37,7 +34,6 @@ public class BoardDto {
     }
 
     @Getter
-    @Builder
     @AllArgsConstructor
     public static class Response {
 

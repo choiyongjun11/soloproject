@@ -20,7 +20,7 @@ public class Comment {
 
     //board 와의 관계 매핑 board(1) <-> comment(N)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board-id", nullable = false)
+    @JoinColumn(name = "board_id", nullable = false)
     private Board board;
 
     @ManyToOne
@@ -36,6 +36,11 @@ public class Comment {
     @Builder.Default // 빌더 패턴 사용 시 기본값으로 현재 시간(LocalDateTime.now())을 설정
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now(); // 등록 날짜 자동 설정
+
+    //댓글 수정
+    public void update(String comment) {
+        this.content = content;
+    }
 
 
 }

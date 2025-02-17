@@ -3,7 +3,9 @@ package com.springboot.comment.service;
 import com.springboot.auth.utils.AuthorityUtils;
 import com.springboot.board.entity.Board;
 import com.springboot.board.repository.BoardRepository;
+import com.springboot.comment.dto.CommentDto;
 import com.springboot.comment.entity.Comment;
+import com.springboot.comment.mapper.CommentMapper;
 import com.springboot.comment.repository.CommentRepository;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
@@ -23,12 +25,14 @@ public class CommentService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
     private final AuthorityUtils authorityUtils;
+    private final CommentMapper commentMapper;
 
-    public CommentService(CommentRepository commentRepository, BoardRepository boardRepository, MemberRepository memberRepository, AuthorityUtils authorityUtils) {
+    public CommentService(CommentRepository commentRepository, BoardRepository boardRepository, MemberRepository memberRepository, AuthorityUtils authorityUtils, CommentMapper commentMapper) {
         this.commentRepository = commentRepository;
         this.boardRepository = boardRepository;
         this.memberRepository = memberRepository;
         this.authorityUtils = authorityUtils;
+        this.commentMapper = commentMapper;
     }
 
     /*
@@ -44,7 +48,7 @@ public class CommentService {
     //등록, 수정, 삭제 만 기능 만들기,
     //게시글 조회 후 -> content(댓글) 작성하기, 작성은 admin 권한을 가진 사용자만 가능합니다.
 
-    public Comment createComment(Long boardId, String email, String content, boolean secret) {
+    public Comment createComment(Long boardId, String email, CommentDto.Post postDto) {
         // 1. 게시글 조회
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.NOT_FOUND));
@@ -64,23 +68,23 @@ public class CommentService {
             throw new BusinessLogicException(ExceptionCode.NOT_EXTENDED);
         }
 
-        // 5. 댓글 생성
-        Comment comment = new Comment();
+        // 5. 댓글 생성 -> commentDto -> Response 클래스 참고
+        Comment comment = commentMapper.PostDtoToComment(postDto);
         comment.setBoard(board);
         comment.setMember(member);
-        comment.setContent(content);
-        comment.setSecret(board.isSecret()); // 질문 비밀글 여부를 따라감
+        comment.setSecret(postDto.isSecret()); //dto에서 가져옴
         comment.setCreatedAt(LocalDateTime.now());
+
 
         // 6. 질문 상태 변경
         board.setQuestionStatus(Board.QuestionStatus.QUESTION_ANSWERED);
         boardRepository.save(board);
 
+        // 7. 댓글 저장 후 반환
         return commentRepository.save(comment);
     }
 
-
-    public Comment updateComment(Long commentId, String email, String newContent) {
+    public Comment updateComment(Long commentId, String email, CommentDto.Patch patchDto) {
         //**질문에 대한 답변 수정 - 회원(고객)이 등록한 1건의 질문에 관리자가 등록한 답변을 수정하는 기능 (Update)**
         //- 등록된 답변의 내용은 답변을 등록한 관리자만 수정할 수 있어야 한다.
         // 1. 댓글 조회
@@ -92,18 +96,21 @@ public class CommentService {
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.NOT_FOUND));
 
         // 3. 댓글 작성자(관리자)만 수정 가능
-        if (!comment.getMember().getEmail().equals(email)) {
+        List<String> roles = authorityUtils.createRoles(member.getEmail());
+        if (!roles.contains("ADMIN")) {
             throw new BusinessLogicException(ExceptionCode.METHOD_NOT_ALLOWED);
         }
 
         // 4. 수정할 내용이 비어 있으면 예외 발생
-        if (newContent == null || newContent.trim().isEmpty()) {
+        if (patchDto.getContent() == null || patchDto.getContent().trim().isEmpty()) {
             throw new BusinessLogicException(ExceptionCode.NOT_FOUND);
         }
 
-        // 5. 댓글 수정
-        comment.setContent(newContent);
+        // 5. 댓글 업데이트
+        comment.setContent(patchDto.getContent());
+        comment.setSecret(patchDto.isSecret()); // 비밀 여부 업데이트
 
+        // 6. 변경 사항 저장 후 엔티티 반환
         return commentRepository.save(comment);
 
     }
@@ -117,7 +124,7 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.NOT_FOUND));
 
-        // 2. 회원 조회 (email 기반)
+        // 2. 회원 조회
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.NOT_FOUND));
 
@@ -130,7 +137,6 @@ public class CommentService {
         // 4. 댓글 삭제
         commentRepository.delete(comment);
 
-
-
     }
+
 }

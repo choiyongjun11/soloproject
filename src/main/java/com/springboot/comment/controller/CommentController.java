@@ -22,9 +22,9 @@ public class CommentController {
 
     // 댓글 생성
     @PostMapping
-    public ResponseEntity<CommentDto.Response> postComment(@RequestParam long boardId, @RequestParam String email, @RequestParam String content, @RequestParam boolean secret) {
-        // 댓글 생성 서비스 호출
-        Comment comment = commentService.createComment(boardId, email, content, secret);
+    public ResponseEntity<CommentDto.Response> postComment(@RequestBody CommentDto.Post postDto, @RequestParam long boardId, @RequestParam String email){
+        //댓글 수정 서비스 호출
+        Comment comment = commentService.createComment(boardId, email, postDto);
 
         // 생성된 댓글을 DTO로 변환
         CommentDto.Response responseDto = mapper.commentToCommentDtoResponse(comment);
@@ -35,9 +35,9 @@ public class CommentController {
 
     // 댓글 수정
     @PatchMapping("/{comment-id}")
-    public ResponseEntity<CommentDto.Response> patchComment(@PathVariable("comment-id") long commentId, @RequestParam String content, @RequestParam boolean secret) {
+    public ResponseEntity<CommentDto.Response> patchComment(@PathVariable("comment-id") long commentId,@RequestParam String email, @RequestBody CommentDto.Patch patchDto) {
         // 댓글 수정 서비스 호출
-        Comment comment = commentService.updateComment(commentId, content, String.valueOf(secret));
+        Comment comment = commentService.updateComment(commentId, email, patchDto);
 
         // 수정된 댓글을 DTO로 변환
         CommentDto.Response responseDto = mapper.commentToCommentDtoResponse(comment);
@@ -49,6 +49,7 @@ public class CommentController {
     // 댓글 삭제
     @DeleteMapping("/{comment-id}")
     public ResponseEntity<String> deleteComment(@PathVariable("comment-id") long commentId, @RequestParam String email) {
+
         // 댓글 삭제 서비스 호출
         commentService.deleteComment(commentId, email);
 
