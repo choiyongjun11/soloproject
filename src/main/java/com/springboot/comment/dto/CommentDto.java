@@ -13,9 +13,11 @@ public class CommentDto {
     @Getter
     @AllArgsConstructor
     public static class Post {
+        private long boardId;
         @NotSpace
         private String content;
         private boolean secret;
+        private String email;
 
     }
 

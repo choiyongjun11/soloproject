@@ -38,6 +38,7 @@ public class BoardController {
 
     }
 
+
     @PatchMapping("/{board-id}")
     public ResponseEntity patchBoard(@PathVariable("board-id") long boardId, @RequestParam long memberId, @RequestBody BoardDto.Patch patchDto) {
         Board updatedBoard = boardService.updateBoard(boardId, memberId, patchDto);
@@ -67,6 +68,8 @@ public class BoardController {
         return ResponseEntity.noContent().build();
 
     }
+
+
 
 
 

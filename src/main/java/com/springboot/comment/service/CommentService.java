@@ -48,7 +48,7 @@ public class CommentService {
     //등록, 수정, 삭제 만 기능 만들기,
     //게시글 조회 후 -> content(댓글) 작성하기, 작성은 admin 권한을 가진 사용자만 가능합니다.
 
-    public Comment createComment(Long boardId, String email, CommentDto.Post postDto) {
+    public Comment createComment(Long boardId, String email, String content, boolean secret) {
         // 1. 게시글 조회
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.NOT_FOUND));
@@ -69,10 +69,11 @@ public class CommentService {
         }
 
         // 5. 댓글 생성 -> commentDto -> Response 클래스 참고
-        Comment comment = commentMapper.PostDtoToComment(postDto);
+        Comment comment = new Comment();
         comment.setBoard(board);
         comment.setMember(member);
-        comment.setSecret(postDto.isSecret()); //dto에서 가져옴
+        comment.setContent(content); // 추가된 부분
+        comment.setSecret(secret); // 추가된 부분
         comment.setCreatedAt(LocalDateTime.now());
 
 
