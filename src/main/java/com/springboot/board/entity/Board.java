@@ -1,7 +1,6 @@
 package com.springboot.board.entity;
 
 import com.springboot.audit.Auditable;
-import com.springboot.board.image.BoardImage;
 import com.springboot.comment.entity.Comment;
 import com.springboot.like.entity.Like;
 import com.springboot.member.entity.Member;
@@ -50,7 +49,7 @@ public class Board extends Auditable {
     @Builder.Default // 빌더 패턴 사용 시 조회 수 기본값을 0으로 설정
     private long viewCount= 0; // 조회 수 초기값
 
-    public void increaseViewCount(long boardId) {
+    public void increaseViewCount() {
         this.viewCount++;
     }
 
@@ -74,10 +73,7 @@ public class Board extends Auditable {
     }
 
     //5.첨부파일 업로드 기능
-    @Column
-    private String imageUpload;
-
-    @OneToMany(mappedBy = "board", cascade = CascadeType.PERSIST) //연관 관계 매핑
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true) //연관 관계 매핑
     private List<BoardImage> boardImages = new ArrayList<>();
 
     /*

@@ -5,9 +5,12 @@ import com.springboot.board.entity.Board;
 import com.springboot.board.mapper.BoardMapper;
 import com.springboot.board.service.BoardService;
 
+import org.apache.tomcat.jni.Multicast;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 
@@ -29,15 +32,21 @@ public class BoardController {
         this.mapper = mapper;
     }
 
-    @PostMapping
-    public ResponseEntity postBoard(@RequestBody BoardDto.Post requestbody, @RequestParam long memberId) {
-        Board board = mapper.PostDtoToBoard(requestbody);
-        Board createBoard = boardService.createBoard(requestbody, memberId);
-        URI location = URI.create(BOARD_DEFAULT_URL + "/" + createBoard.getBoardId());
+    //질문 & 파일 업로드 기능
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity postBoard(
+            @RequestPart("board") BoardDto.Post requestBody,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestParam long memberId) {
+
+        // 게시글 생성 서비스 호출 (이미지 포함)
+        Board createdBoard = boardService.createBoard(requestBody, memberId, image);
+
+        // 생성된 게시글 URL 설정
+        URI location = URI.create(BOARD_DEFAULT_URL + "/" + createdBoard.getBoardId());
+
         return ResponseEntity.created(location).build();
-
     }
-
 
     @PatchMapping("/{board-id}")
     public ResponseEntity patchBoard(@PathVariable("board-id") long boardId, @RequestParam long memberId, @RequestBody BoardDto.Patch patchDto) {

@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,7 +38,7 @@ public class BoardService {
         this.authorityUtils = authorityUtils;
     }
 
-    public Board createBoard(BoardDto.Post postDto, long memberId) {
+    public Board createBoard(BoardDto.Post postDto, long memberId, MultipartFile image) {
 
         /*
         - **질문은 회원(고객)만 등록할 수 있다.**
@@ -84,7 +85,6 @@ public class BoardService {
 
         return boardRepository.save(board);
 
-
     }
 
     @Transactional
@@ -128,8 +128,8 @@ public class BoardService {
             throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
         }
 
-        board.increaseViewCount(boardId); // 조회 수 증가
-        boardRepository.save(board); // 변경 사항 저장
+        board.increaseViewCount(); // 조회 수 증가
+        //boardRepository.save(board); // 변경 사항 저장
 
         return board;
 
@@ -229,13 +229,12 @@ public class BoardService {
             board.setContent(patchDto.getContent());
         }
 
-        // 5. 비밀글로 변경할 경우 상태 업데이트
+        // 5. 비밀글로 변경할 경우
         if (patchDto.isSecret()) {
             board.setSecret(true);
             board.setQuestionStatus(Board.QuestionStatus.QUESTION_SECRET);
         } else {
-            board.setSecret(false);
-            board.setQuestionStatus(Board.QuestionStatus.QUESTION_PUBLIC); // 공개글 상태로 변경
+            board.setSecret(false); // 공개글 상태
         }
 
         return boardRepository.save(board);
@@ -270,8 +269,7 @@ public class BoardService {
         // 4. 상태를 `QUESTION_DELETED`로 변경
         board.setQuestionStatus(Board.QuestionStatus.QUESTION_DELETED);
 
-        boardRepository.save(board);
-
+      //  boardRepository.save(board);
 
     }
 

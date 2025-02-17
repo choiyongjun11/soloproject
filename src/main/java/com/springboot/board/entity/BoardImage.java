@@ -1,7 +1,6 @@
-package com.springboot.board.image;
+package com.springboot.board.entity;
 
 
-import com.springboot.board.entity.Board;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,15 +13,22 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name ="boardImage")
+@Table(name ="board_image")
 public class BoardImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
-    private String url;
 
-    @ManyToOne(fetch = FetchType.LAZY) //N(board) : 1(BoardImage)
+    @Column(name = "image_path", nullable = false)
+    private String imagePath; //사진 경로
+
+    @ManyToOne //N(board) : 1(BoardImage) FK
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
+
+    public BoardImage(String imagePath, Board board) {
+        this.imagePath = imagePath;
+        this.board = board;
+    }
+
 }
