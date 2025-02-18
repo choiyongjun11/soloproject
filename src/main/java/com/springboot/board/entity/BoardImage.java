@@ -14,6 +14,10 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 @Table(name ="board_image")
+
+
+//이미지 업로드 기능과 맞지 않은 구현으로 해당 클래스 중단 시킵니다. 25-02-18 10:07 최용준 (인)
+
 public class BoardImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

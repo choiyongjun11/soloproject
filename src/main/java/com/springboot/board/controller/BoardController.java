@@ -22,7 +22,6 @@ get,post,patch,delete 기능 구성
 @RestController
 @RequestMapping("/v1/boards")
 public class BoardController {
-
     private final static String BOARD_DEFAULT_URL = "/v1/boards";
     private final BoardService boardService;
     private final BoardMapper mapper;
@@ -77,8 +76,6 @@ public class BoardController {
         return ResponseEntity.noContent().build();
 
     }
-
-
 
 
 

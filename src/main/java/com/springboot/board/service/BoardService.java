@@ -269,7 +269,7 @@ public class BoardService {
         // 4. 상태를 `QUESTION_DELETED`로 변경
         board.setQuestionStatus(Board.QuestionStatus.QUESTION_DELETED);
 
-      //  boardRepository.save(board);
+        //  boardRepository.save(board);
 
     }
 
@@ -305,6 +305,5 @@ public class BoardService {
         return board;
 
     }
-
 
 }

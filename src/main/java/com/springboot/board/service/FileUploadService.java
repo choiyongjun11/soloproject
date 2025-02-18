@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+
 @Service
 public class FileUploadService {
     private static final String UPLOAD_DIR = "C:/practice/soloproject_choiyongjun/src/main/resources/uploads/";
@@ -44,5 +45,4 @@ public class FileUploadService {
             throw new RuntimeException("허용되지 않은 파일 형식입니다. (JPEG, PNG, GIF만 가능)");
         }
     }
-
 }

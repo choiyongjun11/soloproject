@@ -8,6 +8,7 @@ import com.springboot.member.repository.MemberRepository;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -90,6 +91,5 @@ public class MemberService {
         if (member.isPresent())
             throw new BusinessLogicException(ExceptionCode.NOT_FOUND);
     }
-
 
 }

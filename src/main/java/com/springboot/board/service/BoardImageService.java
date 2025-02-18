@@ -13,10 +13,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-//이미지 파일 저장 및 board 와 연결 할 수 있도록 하자.
 @Service
 public class BoardImageService {
-
     private final BoardImageRepository boardImageRepository;
     private final BoardRepository boardRepository;
     private final FileUploadService fileUploadService;
@@ -69,9 +67,6 @@ public class BoardImageService {
                 .map(BoardImage::getImagePath)
                 .collect(Collectors.toList());
     }
-
-
-
 
 
 
