@@ -31,19 +31,12 @@ public class BoardController {
         this.mapper = mapper;
     }
 
-    //질문 & 파일 업로드 기능
-    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity postBoard(
-            @RequestPart("board") BoardDto.Post requestBody,
-            @RequestPart(value = "image", required = false) MultipartFile image,
-            @RequestParam long memberId) {
-
-        // 게시글 생성 서비스 호출 (이미지 포함)
-        Board createdBoard = boardService.createBoard(requestBody, memberId, image);
-
-        // 생성된 게시글 URL 설정
-        URI location = URI.create(BOARD_DEFAULT_URL + "/" + createdBoard.getBoardId());
-
+    //질문 기능
+    @PostMapping
+    public ResponseEntity postBoard(@RequestBody BoardDto.Post requestbody, @RequestParam long memberId) {
+        Board board = mapper.PostDtoToBoard(requestbody);
+        Board createBoard = boardService.createBoard(requestbody, memberId);
+        URI location = URI.create(BOARD_DEFAULT_URL + "/" + createBoard.getBoardId());
         return ResponseEntity.created(location).build();
     }
 
@@ -61,11 +54,11 @@ public class BoardController {
 
     }
 
-    @GetMapping
-    public ResponseEntity getBoards(@RequestParam Long memberId, @RequestParam(defaultValue = "latest") String sortBy,
+    @GetMapping //전체 조회
+    public ResponseEntity<Page<BoardDto.Response>> getBoards(@RequestParam Long memberId, @RequestParam(defaultValue = "latest") String sortBy,
                                     @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-        Page<Board> pageBoard = boardService.findBoards(memberId, sortBy, page, size);
-        Page<BoardDto.Response> responsePage = pageBoard.map(mapper::boardToBoardDtoResponse);
+        //boardservice에서 게시글과 댓글 정보를 포함한 결과 조회
+        Page<BoardDto.Response> responsePage = boardService.findBoards(memberId, sortBy, page, size);
         return ResponseEntity.ok(responsePage);
 
     }

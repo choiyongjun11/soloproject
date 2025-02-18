@@ -4,6 +4,10 @@ import com.springboot.auth.utils.AuthorityUtils;
 import com.springboot.board.dto.BoardDto;
 import com.springboot.board.entity.Board;
 import com.springboot.board.repository.BoardRepository;
+import com.springboot.comment.dto.CommentDto;
+import com.springboot.comment.entity.Comment;
+import com.springboot.comment.mapper.CommentMapper;
+import com.springboot.comment.repository.CommentRepository;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.entity.Member;
@@ -20,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 //create, find, update, delete
@@ -31,14 +36,18 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final MemberService memberService;
     private final AuthorityUtils authorityUtils;
+    private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
 
-    public BoardService(BoardRepository boardRepository, MemberService memberService, AuthorityUtils authorityUtils) {
+    public BoardService(BoardRepository boardRepository, MemberService memberService, AuthorityUtils authorityUtils, CommentRepository commentRepository, CommentMapper commentMapper) {
         this.boardRepository = boardRepository;
         this.memberService = memberService;
         this.authorityUtils = authorityUtils;
+        this.commentRepository = commentRepository;
+        this.commentMapper = commentMapper;
     }
 
-    public Board createBoard(BoardDto.Post postDto, long memberId, MultipartFile image) {
+    public Board createBoard(BoardDto.Post postDto, long memberId) {
 
         /*
         - **질문은 회원(고객)만 등록할 수 있다.**
@@ -136,7 +145,7 @@ public class BoardService {
     }
 
     @Transactional
-    public Page<Board> findBoards(Long memberId, String sortBy, int page, int size) {
+    public Page<BoardDto.Response> findBoards(Long memberId, String sortBy, int page, int size) {
 
         /*
         **여러 건의 질문 조회 - 회원(고객)이 등록한 여러 건의 질문을 조회하는 기능 (Read - SelectAll)**
@@ -153,47 +162,66 @@ public class BoardService {
             ㄴ 조회수가 적은 순으로(조회수 구현 이후 적용)
          */
 
-        // 삭제된 질문을 제외
+        // 삭제된 질문 제외
         Board.QuestionStatus deletedStatus = Board.QuestionStatus.QUESTION_DELETED;
 
-        // Pageable 객체 생성 (페이지 번호, 페이지 크기, 정렬 기준)
+        // 페이지네이션 + 정렬 옵션 적용
         Pageable pageable = PageRequest.of(page, size, getSortBy(sortBy));
 
-        // 회원(고객) 또는 관리자 여부 확인
+        // 회원이 관리자(Admin)인지 확인
         List<String> roles = authorityUtils.createRoles(memberService.findVerifiedMember(memberId).getEmail());
         boolean isAdmin = roles.contains("ADMIN");
 
-        // 관리자: 모든 질문 조회, 일반 회원: 본인의 질문만 조회
+        // 관리자: 모든 질문 조회, 일반 회원: 본인 질문만 조회
+        Page<Board> boardPage;
         if (isAdmin) {
-            return boardRepository.findAllByQuestionStatusNot(deletedStatus, pageable);
+            boardPage = boardRepository.findAllByQuestionStatusNot(deletedStatus, pageable);
         } else {
-            return boardRepository.findAllByMember_MemberIdAndQuestionStatusNot(memberId, deletedStatus, pageable);
+            boardPage = boardRepository.findAllByMember_MemberIdAndQuestionStatusNot(memberId, deletedStatus, pageable);
         }
 
+        // 댓글을 포함한 DTO 변환
+        return boardPage.map(board -> {
+            // 해당 질문의 댓글 리스트 가져오기
+            List<Comment> comments = commentRepository.findByBoard(board);
+            List<CommentDto.Response> commentResponses = comments.stream()
+                    .map(commentMapper::commentToCommentDtoResponse)
+                    .collect(Collectors.toList());
 
-
+            // BoardDto.Response 변환 후 반환
+            return new BoardDto.Response(
+                    board.getBoardId(),
+                    board.getTitle(),
+                    board.getContent(),
+                    board.isSecret(),
+                    board.getQuestionStatus(),
+                    board.getCreatedAt(),
+                    board.getViewCount(),
+                    board.getLikeCount(),
+                    commentResponses //댓글 리스트 추가
+            );
+        });
     }
 
     // 정렬 기준을 받는 메서드
     private Sort getSortBy(String sortBy) {
         switch (sortBy) {
             case "latest":
-                return Sort.by(Sort.Order.desc("createdAt")); // 최신글 순
+                return Sort.by(Sort.Direction.DESC, "createdAt"); //답변 등록 기준 최신
             case "oldest":
-                return Sort.by(Sort.Order.asc("createdAt")); // 오래된 글 순
-            case "likesDesc":
-                return Sort.by(Sort.Order.desc("likeCount")); // 좋아요 많은 순
-            case "likesAsc":
-                return Sort.by(Sort.Order.asc("likeCount")); // 좋아요 적은 순
-            case "viewCountDesc":
-                return Sort.by(Sort.Order.desc("viewCount")); // 조회수 많은 순
-            case "viewCountAsc":
-                return Sort.by(Sort.Order.asc("viewCount")); // 조회수 적은 순
+                return Sort.by(Sort.Direction.ASC, "createdAt"); // 답변 등록 기준 오래된
+            case "mostLikes":
+                return Sort.by(Sort.Direction.DESC, "likeCount"); //좋아요 수 최신
+            case "leastLikes":
+                return Sort.by(Sort.Direction.ASC, "likeCount"); //좋아요 수 오래된
+            case "mostViews":
+                return Sort.by(Sort.Direction.DESC, "viewCount"); //조회 수 최신
+            case "leastViews":
+                return Sort.by(Sort.Direction.ASC, "viewCount"); //조회 수 오래된
             default:
-                return Sort.by(Sort.Order.desc("createdAt")); // 기본적으로 최신글 순
+                return Sort.by(Sort.Direction.DESC, "createdAt"); //default
         }
     }
-
 
     @Transactional
     public Board updateBoard(long boardId, long memberId, BoardDto.Patch patchDto){
